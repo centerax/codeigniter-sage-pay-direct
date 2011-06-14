@@ -1,0 +1,6 @@
+name: sagepay_direct
+version: 0.0.1
+compatibility: 2.0.0
+dependencies:
+  curl: 1.2.0
+tags: ["sagepay", "payment", "gateway", "direct", "sage"]
