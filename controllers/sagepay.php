@@ -32,7 +32,7 @@ class Sagepay extends CI_Controller {
 
 		$cc = array(
 						'card_holder' => 'pablo b',
-						'card_number' => '5404000000000001',
+						'card_number' => '5404000000000001', //Sandbox Credit Cards can be found here, http://j.mp/r2qmAm
 						'cv2' => '123',
 						'card_type' => 'MC',
 						'expiry_date' => '0617'
