@@ -1,10 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 // You can apply for a sim account here http://j.mp/mSVIVk
-$config ['sagepay_direct']['mode'] = 'test';
+$config ['sagepay_direct']['mode'] = '';
 
 // SagePay vendorname
-$config ['sagepay_direct']['vendorname'] = 'testebizmarts';
+$config ['sagepay_direct']['vendorname'] = '';
 
 // Current version is 2.23
 $config ['sagepay_direct']['protocol_version'] = '2.23';
