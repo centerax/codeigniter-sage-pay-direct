@@ -1,7 +1,7 @@
 CodeIgniter Sage Pay DIRECT Integration
 ================
 
-CodeIgniter Sage Pay Direct is a CodeIgniter library which makes it easy to use the DIRECT protocol, also, implementst 3D secure payments.
+CodeIgniter [Sage Pay](http://www.sagepay.com/) Direct is a CodeIgniter library which makes it easy to use the DIRECT protocol, also, implementst 3D secure payments.
 
 Usage
 -----
