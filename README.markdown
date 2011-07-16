@@ -13,7 +13,7 @@ Along with the library is a demo controller with two methods
 
 If you take a look at the controller you will see how easy is to use this library.
 
-You will need at least a _SIMULATOR_ account in order to play with this library. You can apply for a SIMULATOR account [here](http://j.mp/mSVIVk), it is free.
+You will need at least a _SIMULATOR_ account in order to play with this library. You can apply for a _SIMULATOR_ account [here](http://j.mp/mSVIVk), it is free.
 
 ---
 
