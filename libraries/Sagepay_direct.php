@@ -9,7 +9,6 @@
  * @subpackage    	Libraries
  * @category    	Libraries
  * @author        	Pablo S. Benitez
- * @license         http://www.opensource.org/licenses/mit-license.html
  * @link			http://getsparks.org/packages/<TODO>/show
  */
 class Sagepay_direct
@@ -103,7 +102,8 @@ class Sagepay_direct
 		$post ['Vendor'] = $this->_config['vendorname'];
 		$post ['VendorTxCode'] = $this->_get_vendor_tx_code();
 		$post ['TxType'] = $this->_config['payment_type'];
-		$post ['Amount'] = number_format($amount, 2); //Formatted to 2 decimal places with leading digit but no commas or currency symbols
+		//Formatted to 2 decimal places with leading digit but no commas or currency symbols
+		$post ['Amount'] = number_format($amount, 2, '.', '');
 		$post ['Currency'] = $this->_config['currency'];
 
 		// Add customer's IP address only if it is valid
@@ -111,8 +111,8 @@ class Sagepay_direct
 			$post ['ClientIPAddress'] = $this->_ci->input->ip_address();
 		}
 
-		/*// 3D checks flag
-		$post ['Apply3DSecure'] = 2;*/
+		// 3D checks flag
+		$post ['Apply3DSecure'] = $this->_config['threed_checks'];
 
 		// Default is 'E' for Ecommerce
 		$post ['AccountType'] = $this->_config['account_type'];
@@ -127,6 +127,7 @@ class Sagepay_direct
 			$post['Description'] = 'Please enter description to be sent to Sage Pay.';
 		}
 
+		//Description is required
 		$post['Description'] = urlencode($post['Description']);
 
 		// If you want to override any post value such as currency send eg. $additional['Currency']='EUR'
@@ -134,8 +135,35 @@ class Sagepay_direct
 			array_merge($post, $additional);
 		}
 
+		$result = $this->_post_request($post, $this->_get_post_url());
 
-		return $this->_post_request($post);
+		//3D response
+		if( $result['response']['Status'] == '3DAUTH' ){
+
+			$result['callback_url'] = $this->_ci->config->site_url($this->_config['threed_callback_url']);
+
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Build 3D request post.
+	 * @param string $pares PARes value
+	 * @param string $md MD value
+	 * @return array 3D post result
+	 */
+	public function callback_threed($pares, $md)
+	{
+		$post_url = $this->_config[ $this->_config['mode'] . '_threed_post_url' ];
+
+		$data = array();
+		$data ['PARes']   = $pares;
+		$data ['MD']      = $md;
+
+		$result = $this->_post_request($data, $post_url);
+
+		return $result;
 	}
 
 	/**
@@ -150,12 +178,13 @@ class Sagepay_direct
 	/**
 	 * POST request wrapper
 	 * @param array $data Parameters to be posted
+	 * @param string $url URL to POST data to
 	 * @return array Response information
 	 */
-	protected function _post_request(array $data)
+	protected function _post_request(array $data, $url)
 	{
 		// Initialize cURL session
-        $this->_ci->curl->create($this->_get_post_url());
+        $this->_ci->curl->create($url);
 
         // We still want the response even if there is an error code over 400
         $this->_ci->curl->option('failonerror', FALSE);
@@ -197,8 +226,21 @@ class Sagepay_direct
 		}
 
 		if( TRUE === $this->debug ){
-			$output ['request']= $data;
-			$output ['raw_response']= $raw_response;
+
+			$debug_request = $data;
+
+			if( array_key_exists('CardNumber', $debug_request) ){
+				$debug_request ['CardNumber'] = '******************';
+			}
+			if( array_key_exists('CV2', $debug_request) ){
+				$debug_request ['CV2'] = '***';
+			}
+
+			$output ['request']= print_r($debug_request, true);
+			$output ['raw_response']= print_r($raw_response, true);
+
+			log_message('debug', print_r($output, true));
+
 		}
 
 		$output ['response'] = $sagepay;
@@ -206,20 +248,30 @@ class Sagepay_direct
 		return $output;
 	}
 
+	/**
+	 * Camelize array keys
+	 * @param array Array to be modified
+	 * @param string $prefix To add to keys
+	 * @return array Modified array
+	 */
 	public function to_camel_keys(array $array, $prefix = '')
 	{
 		$keys = array_keys($array);
-		//$values = array_map('urlencode', array_values($array));
+
 		return array_combine(array_map(array($this, 'under_to_camel'), $keys), array_values($array));
 	}
 
+	/**
+	 * Underscode to camelcase string
+	 * @param string $str String to be camelcased
+	 * @return string Result string
+	 */
 	public function under_to_camel($str)
 	{
 		if($str == 'cv2'){
 			return strtoupper($str);
 		}
 
-    	//return preg_replace_callback('/_([a-z])/', create_function('$c', 'return strtoupper($c[1]);'), ucfirst($str));
     	return ucfirst( camelize($str) );
 	}
 
